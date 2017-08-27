@@ -15,38 +15,78 @@ func main() {
 		log.Panicln("Could not read current directory.")
 	}
 
+	checkRepository := func(c *cli.Context) error {
+		repository, err := git.OpenRepository(cwd)
+		if err != nil {
+			fmt.Println("Nope, not a git repo.")
+			return fmt.Errorf("Not a git repo.")
+		}
+		fmt.Println("Yup, git repo.")
+		repository.Free()
+		return nil
+	}
+
+	initRepository := func(c *cli.Context) error {
+		repository, err := git.InitRepository(cwd, false)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Failed to initialize grove repository")
+			return err
+		}
+		fmt.Printf("Initialized empty Git repository at %s\n", cwd)
+		repository.Free()
+		return nil
+	}
+
+	listBranches := func(c *cli.Context) error {
+		repository, err := git.OpenRepository(cwd)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to open git repository at %s\n", cwd)
+			return err
+		}
+		branchIterator, err := repository.NewBranchIterator(git.BranchAll)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Failed to get branch iterator")
+			return err
+		}
+
+		err = branchIterator.ForEach(func(branch *git.Branch, branchType git.BranchType) error {
+			branchName, err := branch.Name()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Failed to get branch name")
+				return err
+			}
+			fmt.Println(branchName)
+			return nil
+		})
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Failed to list branches")
+			return err
+		}
+		return nil
+	}
+
 	grover := cli.NewApp()
 	grover.Commands = []cli.Command{
 		{
-			Name:    "check",
-			Aliases: []string{"c"},
-			Usage:   "check if the current directory is a git repository",
-			Action: func(c *cli.Context) error {
-				repository, err := git.OpenRepository(cwd)
-				if err != nil {
-					fmt.Println("Nope, not a git repo.")
-					return fmt.Errorf("Not a git repo.")
-				} else {
-					fmt.Println("Yup, git repo.")
-					repository.Free()
-					return nil
-				}
-			},
+			Name:   "check",
+			Usage:  "check if the current directory is a git repository",
+			Action: checkRepository,
 		},
 		{
-			Name:    "init",
-			Aliases: []string{"i"},
-			Usage:   "initializes a git repository",
-			Action: func(c *cli.Context) error {
-				repository, err := git.InitRepository(cwd, false)
-				if err != nil {
-					fmt.Fprintln(os.Stderr, "Failed to initialize grove repository")
-					return err
-				} else {
-					fmt.Printf("Initialized empty Git repository in %s\n", cwd)
-					repository.Free()
-					return nil
-				}
+			Name:   "init",
+			Usage:  "initializes a git repository",
+			Action: initRepository,
+		},
+		{
+			Name:  "branch",
+			Usage: "list, create, or delete branches",
+			Subcommands: []cli.Command{
+				{
+					Name:    "list",
+					Aliases: []string{"ls", "l"},
+					Usage:   "list branches in current repository",
+					Action:  listBranches,
+				},
 			},
 		},
 	}
