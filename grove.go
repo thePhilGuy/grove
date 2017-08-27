@@ -46,6 +46,7 @@ func main() {
 		branchIterator, err := repository.NewBranchIterator(git.BranchAll)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Failed to get branch iterator")
+			repository.Free()
 			return err
 		}
 
@@ -53,6 +54,7 @@ func main() {
 			branchName, err := branch.Name()
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Failed to get branch name")
+				repository.Free()
 				return err
 			}
 			fmt.Println(branchName)
@@ -60,8 +62,12 @@ func main() {
 		})
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Failed to list branches")
+			branchIterator.Free()
+			repository.Free()
 			return err
 		}
+		branchIterator.Free()
+		repository.Free()
 		return nil
 	}
 
