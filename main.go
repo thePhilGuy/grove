@@ -9,9 +9,11 @@ import (
 )
 
 func main() {
-	globalGrovefile := grovefile.Open()
+	// TODO get grovefile location from config
+	globalGrovefile := grovefile.Load(".grovefile")
 	fmt.Println(globalGrovefile)
 
+	// TODO pass the grovefile context along to cli command parser
 	groverCli := cli.Initialize()
 	groverCli.Run(os.Args)
 }

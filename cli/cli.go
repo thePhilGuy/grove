@@ -18,9 +18,10 @@ func Initialize() *urfaveCli.App {
 			Action: git.CheckRepository,
 		},
 		{
-			Name:   "init",
-			Usage:  "initializes a git repository",
-			Action: git.InitializeRepository,
+			Name:        "init",
+			Usage:       "initializes a grove repository",
+			Description: "Initializes a git repository in the current directory if there isn't one, then adds it to the current grove branch (default master).",
+			Action:      git.InitializeRepository,
 		},
 		{
 			Name:  "branch",

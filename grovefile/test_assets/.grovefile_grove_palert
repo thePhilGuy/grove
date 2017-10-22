@@ -1,0 +1,7 @@
+[grove]
+base: master
+path: ~/Projects/grove
+
+[palert]
+base: master
+path: ~/Projects/palert

@@ -9,6 +9,13 @@ import (
 	"gopkg.in/urfave/cli.v1"
 )
 
+type Repository struct {
+	ActiveBranch string
+	BaseBranch   string
+	Name         string
+	Path         string
+}
+
 func getwd() string {
 	cwd, err := os.Getwd()
 	if err != nil {
